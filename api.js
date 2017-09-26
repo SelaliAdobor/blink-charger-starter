@@ -39,10 +39,36 @@ authenticateSession = (sessionId) => new Promise((resolve, reject) => {
             if (userId) {
                 resolve(userId);
             } else {
-                reject("Failed authenticate session, response: " + response)
+                reject("Failed authenticate session, response: " + JSON.stringify(response))
             }
         })
         .error(reject)
 })
+
+getChargerCode = (sessionId) => new Promise((resolve, reject) => {
+    let options = {
+        json: true,
+        body: {
+            "snm": false
+        }
+    };
+
+    let getChargerCodeEndpoint = process.env.API_ROOT + `/users/blinkcode/issueCode?sessionId=${sessionId}&version=2.0`
+
+    request
+        .post(getChargerCodeEndpoint, options)
+        .then(response => {
+            let code = response["blinkCode"]["code"];
+            if (code) {
+                resolve(code);
+            } else {
+                reject("Failed get charger code, response: " + JSON.stringify(response))
+            }
+        })
+        .error(reject)
+})
+
+
 module.exports.getSessionId = getSessionId;
 module.exports.authenticateSession = authenticateSession;
+module.exports.getChargerCode = getChargerCode;
