@@ -68,7 +68,34 @@ getChargerCode = (sessionId) => new Promise((resolve, reject) => {
         .error(reject)
 })
 
+startCharger = (sessionId, chargerCode) => new Promise((resolve, reject) => {
+    let options = {
+        json: true,
+        body: {
+            "blinkCode": chargerCode,
+            "evseId": process.env.CHARGER_ID,
+            "percentage": 100,
+            "port": 0
+        }
+    };
+
+    let startChargerEndpoint = process.env.API_ROOT + `/evse/remoteStart?sessionId=${sessionId}&version=2.0`
+
+    request
+        .post(startChargerEndpoint, options)
+        .then(response => {
+            const chargerSuccessCode = 200;
+            let responseCode = response["code"];
+            if (responseCode == chargerSuccessCode) {
+                resolve("Success");
+            } else {
+                reject("Failed start charger, response: " + JSON.stringify(response))
+            }
+        })
+        .error(reject)
+})
 
 module.exports.getSessionId = getSessionId;
 module.exports.authenticateSession = authenticateSession;
 module.exports.getChargerCode = getChargerCode;
+module.exports.startCharger = startCharger;
